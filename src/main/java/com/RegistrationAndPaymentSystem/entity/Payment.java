@@ -15,16 +15,11 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne
     private User user;
 
-    @NotNull(message = "Amount is required")
-    private BigDecimal amount;
-
-    @NotBlank(message = "Payment method is required")
-    private String paymentMethod; // e.g., "Google Pay", "Paytm"
-
-    private LocalDateTime paymentDate;
-    private boolean successful;
+    private String paymentMethod;
+    private String paymentStatus; // e.g., "PENDING", "SUCCESS", "FAILED"
+    private Double amount;
 }
+

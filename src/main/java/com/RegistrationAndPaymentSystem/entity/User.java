@@ -3,6 +3,8 @@ package com.RegistrationAndPaymentSystem.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -41,4 +43,37 @@ public class User {
 
     @NotBlank(message = "Password is required")
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role; // Using Enum for role
+
+    private Boolean registrationComplete = false;
+
+    @OneToMany(mappedBy = "referredBy")
+    private List<User> referrals;
+
+    @ManyToOne
+    @JoinColumn(name = "referred_by")
+    private User referredBy;
+
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
+
+    @Column(name = "update_date")
+    private LocalDateTime updatedDate;
+
+    @PrePersist
+    public void prePersist() {
+        createdDate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedDate = LocalDateTime.now();
+    }
+
+    public enum Role {
+        USER,
+        ADMIN
+    }
 }
