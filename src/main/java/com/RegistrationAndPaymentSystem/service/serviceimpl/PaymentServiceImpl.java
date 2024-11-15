@@ -10,9 +10,13 @@ import com.RegistrationAndPaymentSystem.service.PaymentService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
+
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
 
@@ -22,16 +26,19 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDTO initiatePayment(Long userId, String paymentMethod) {
-        // Initialize a payment and set it to "PENDING"
+    public PaymentDTO initiatePayment(Long userId, String paymentMethod, Double amount) {
+        // Find the user by userId
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Create and save the payment
         Payment payment = new Payment();
         payment.setUser(user);
         payment.setPaymentMethod(paymentMethod);
-        payment.setPaymentStatus("PENDING");
-        payment.setAmount(0.0); // Assume initial amount is set to 0, this might change based on your logic
+        payment.setAmount(amount);
+        payment.setStatus("PENDING");
+        payment.setPaymentDate(LocalDateTime.now());
+
         payment = paymentRepository.save(payment);
 
         return convertEntityToDTO(payment);
@@ -39,23 +46,35 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDTO completePayment(Long paymentId) {
+        // Find the payment by ID
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-        payment.setPaymentStatus("SUCCESS");
-        paymentRepository.save(payment);
 
-        // Update user registration status
-        User user = payment.getUser();
-        user.setRegistrationComplete(true);
-        userRepository.save(user);
+        // Complete the payment
+        payment.setStatus("SUCCESS");
+        payment = paymentRepository.save(payment);
 
         return convertEntityToDTO(payment);
     }
 
+    @Override
+    public List<PaymentDTO> getPaymentsByUserId(Long userId) {
+        // Find payments by userId
+        List<Payment> payments = paymentRepository.findByUser_UserId(userId);
+
+        return payments.stream()
+                .map(this::convertEntityToDTO)
+                .collect(Collectors.toList());
+    }
+
     private PaymentDTO convertEntityToDTO(Payment payment) {
         PaymentDTO paymentDTO = new PaymentDTO();
+        paymentDTO.setPaymentId(payment.getPaymentId());
+        paymentDTO.setUserId(payment.getUser().getUserId());
         paymentDTO.setAmount(BigDecimal.valueOf(payment.getAmount()));
         paymentDTO.setPaymentMethod(payment.getPaymentMethod());
+        paymentDTO.setPaymentDate(payment.getPaymentDate());
+        paymentDTO.setStatus(payment.getStatus());
         return paymentDTO;
     }
 }

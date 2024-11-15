@@ -20,21 +20,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Register a new user
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody @Valid UserDTO userDTO) {
         User registeredUser = userService.registerUser(userDTO);
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
 
-    // Refer a new user
     @PostMapping("/{userId}/refer")
     public ResponseEntity<UserDTO> referUser(@PathVariable Long userId, @RequestBody @Valid UserDTO referredUserDTO) {
         UserDTO referredUser = userService.referUser(userId, referredUserDTO);
         return new ResponseEntity<>(referredUser, HttpStatus.CREATED);
     }
 
-    // Get referral status
     @GetMapping("/{userId}/referrals")
     public ResponseEntity<List<UserDTO>> getReferralStatus(@PathVariable Long userId) {
         List<UserDTO> referrals = userService.getReferralStatus(userId);

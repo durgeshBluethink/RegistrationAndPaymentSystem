@@ -1,15 +1,17 @@
 package com.RegistrationAndPaymentSystem.dto;
 
 import lombok.Data;
-import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class PaymentDTO {
-    @NotNull(message = "Amount is required")
-    private BigDecimal amount;
 
-    @NotBlank(message = "Payment method is required")
+    private Long paymentId;
+    private Long userId;  // ID of the user associated with the payment
+    private BigDecimal amount;
     private String paymentMethod;
+    private LocalDateTime paymentDate;
+    private String status;
 }
